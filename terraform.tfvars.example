@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars and fill in.
+#
+# Only required when creating the estate from scratch. When adopting the
+# existing us-east-1 resources via imports.tf, any non-empty value works: the
+# lifecycle block on aws_db_instance.workshop ignores changes to the password.
+
+region      = "us-east-1"
+name_prefix = "soc2-workshop"
+
+db_password = "replace-me"
