@@ -99,9 +99,9 @@ resource "aws_s3_bucket_policy" "trail_logs" {
 
 data "aws_iam_policy_document" "trail_logs" {
   statement {
-    sid     = "AWSCloudTrailAclCheck"
-    effect  = "Allow"
-    actions = ["s3:GetBucketAcl"]
+    sid       = "AWSCloudTrailAclCheck"
+    effect    = "Allow"
+    actions   = ["s3:GetBucketAcl"]
     resources = [aws_s3_bucket.trail_logs.arn]
 
     principals {

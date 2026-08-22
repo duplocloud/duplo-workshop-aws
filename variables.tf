@@ -11,12 +11,17 @@ variable "name_prefix" {
 }
 
 variable "db_password" {
-  description = <<-EOT
-    Master password for soc2-workshop-db. The live value is not readable via the
-    AWS API, so it cannot be reproduced from the running instance. Supply it to
-    create the instance from scratch; on `terraform import` it is ignored (see
-    the lifecycle block on aws_db_instance.workshop).
-  EOT
+  description = "Master password for soc2-workshop-db."
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = length(var.db_password) >= 8 && length(var.db_password) <= 128
+    error_message = "RDS requires a master password of 8-128 characters."
+  }
+
+  validation {
+    condition     = !can(regex("[/\"@ ]", var.db_password))
+    error_message = "RDS forbids /, \", @ and spaces in the master password."
+  }
 }

@@ -49,10 +49,4 @@ resource "aws_db_instance" "workshop" {
 
   # Destroy-time behaviour only; not an attribute of the running instance.
   skip_final_snapshot = true
-
-  lifecycle {
-    # The master password cannot be read back from AWS, so an imported instance
-    # would otherwise show a permanent diff against var.db_password.
-    ignore_changes = [password]
-  }
 }

@@ -1,11 +1,42 @@
+# Provider plugins and module cache — 792M locally, re-created by `terraform init`.
 .terraform/
+
+# State and its backups. This config has no remote backend, so state is written
+# locally and contains the RDS master password in plaintext.
 *.tfstate
 *.tfstate.*
+.terraform.tfstate.lock.info
+
+# Saved plans. Binary plans embed variable values, including db_password.
 *.tfplan
+tfplan
+
+# Variable files hold the db_password value. terraform.tfvars.example is the
+# committed template and is re-included below.
+*.tfvars
+!*.tfvars.example
+
+# CLI configuration, which can carry registry credentials.
+.terraformrc
+terraform.rc
+
+# Crash reports include the rendered configuration.
 crash.log
-terraform.tfvars
-*.auto.tfvars
+crash.*.log
+
+# Local overrides, by convention not shared.
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Claude Code local settings (.claude/settings.json is shared and stays tracked)
+.claude/settings.local.json

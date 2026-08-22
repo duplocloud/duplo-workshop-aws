@@ -3,9 +3,9 @@
 Reverse-engineered from the live `us-east-1` resources in account `803817915563`
 tagged `ManagedBy=terraform` and named `soc2-workshop-*`. Inspected 2026-08-21.
 
-This is a faithful reproduction of the running state, not a target state. It is
-written so that `terraform apply` against the existing resources adopts them
-with no changes.
+This is a faithful reproduction of the state those resources were in, not a
+target state. The originals have since been deleted, so this config now creates
+the estate from scratch.
 
 ## Resources covered
 
@@ -23,16 +23,20 @@ The account holds two other estates carrying the same `ManagedBy=terraform` tag
 — `ecomm-workshop` (43 resources) and `firstbank` (17 ECS task-definition
 revisions). Neither is in scope here.
 
-## Adopting the existing resources
+## Creating the estate
 
 ```sh
 terraform init
-cp terraform.tfvars.example terraform.tfvars   # any db_password value will do
+cp terraform.tfvars.example terraform.tfvars   # set a real db_password
 terraform plan
 ```
 
-A clean adoption reports `16 to import, 0 to add, 0 to change, 0 to destroy`.
-After `terraform apply`, delete `imports.tf`.
+A clean run reports `16 to add, 0 to change, 0 to destroy`. The RDS instance
+takes roughly 5-10 minutes; everything else is quick.
+
+An earlier revision carried an `imports.tf` of 16 import blocks for adopting the
+original resources. It was removed once those resources were deleted, since an
+import block naming a non-existent object fails the plan outright.
 
 ## Referenced but not managed
 
@@ -47,9 +51,9 @@ declared:
 
 Three details of the live estate could not be carried over exactly:
 
-- **DB master password** — not readable through the AWS API. It is a required
-  variable, and `aws_db_instance.workshop` ignores changes to it so an imported
-  instance does not show a permanent diff.
+- **DB master password** — the original was not readable through the AWS API,
+  so it could not be carried over. `var.db_password` sets a new one at create
+  time.
 - **DB backup window** — RDS reports `08:51-09:21`, but rejects a backup window
   while `backup_retention_period` is `0`. Recorded as a comment in `rds.tf`
   rather than declared.
