@@ -64,5 +64,5 @@ Absent configurations are represented by the absence of a resource: neither
 bucket has versioning, access logging, lifecycle rules, CORS, replication,
 notifications, or object lock, and the trail has no event or insight selectors.
 
-Tagging is expressed once, as provider `default_tags`, because all seven
-resources carry exactly the tag `ManagedBy=terraform`.
+Tagging is expressed once, as provider `default_tags`: `ManagedBy=terraform`,
+matching the original estate, plus `Extension=soc2-posture`.

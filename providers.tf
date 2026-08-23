@@ -1,11 +1,14 @@
 provider "aws" {
   region = var.region
 
-  # Every resource in this estate carries exactly one tag, ManagedBy=terraform,
-  # so it is expressed once here rather than repeated on each resource.
+  # Applied to every taggable resource in the estate rather than repeated on
+  # each one. The sub-resources that configure the S3 buckets (ACL, ownership
+  # controls, public access block, encryption, policy) take no tags, so these
+  # land on 7 of the 16 resources.
   default_tags {
     tags = {
       ManagedBy = "terraform"
+      Extension = "soc2-posture"
     }
   }
 }
