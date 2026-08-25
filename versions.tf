@@ -5,7 +5,7 @@ terraform {
   backend "s3" {
     bucket = "duplocloud-workshop-terraform"
     key    = "soc2-resources/terraform.tfstate"
-    region = "us-east-1"
+    region = "us-west-2"
 
     encrypt = true
 
