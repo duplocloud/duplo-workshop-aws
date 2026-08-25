@@ -1,4 +1,25 @@
 ###############################################################################
+# soc2-workshop-db-subnet-group
+#
+# The account/region has no "default" DB subnet group, which is what RDS
+# falls back to when db_subnet_group_name is omitted or set to "default".
+# Declared explicitly here from the default VPC's subnets so the RDS instance
+# in rds.tf doesn't hit DBSubnetGroupNotFoundFault.
+###############################################################################
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+resource "aws_db_subnet_group" "workshop" {
+  name       = "${var.name_prefix}-db-subnet-group"
+  subnet_ids = data.aws_subnets.default.ids
+}
+
+###############################################################################
 # soc2-workshop-app-sg
 #
 # Lives in the account's default VPC. Inline ingress/egress blocks are used so

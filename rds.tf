@@ -1,10 +1,11 @@
 ###############################################################################
 # soc2-workshop-db
 #
-# PostgreSQL 15.7 on db.t3.micro, in the default VPC's default DB subnet group
-# and the default.postgres15 parameter group. Not managed by this config are
-# the subnet group and parameter group themselves, which are AWS-provided
-# defaults and are referenced by name.
+# PostgreSQL 15.7 on db.t3.micro, in the default VPC via the
+# aws_db_subnet_group declared in network.tf, and the default.postgres15
+# parameter group. Not managed by this config are the parameter group and
+# option group themselves, which are AWS-provided defaults and are referenced
+# by name.
 ###############################################################################
 
 resource "aws_db_instance" "workshop" {
@@ -24,7 +25,7 @@ resource "aws_db_instance" "workshop" {
   availability_zone      = "us-east-1d"
   multi_az               = false
   publicly_accessible    = true
-  db_subnet_group_name   = "default"
+  db_subnet_group_name   = aws_db_subnet_group.workshop.name
   vpc_security_group_ids = [aws_security_group.app.id]
 
   parameter_group_name = "default.postgres15"

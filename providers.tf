@@ -18,3 +18,7 @@ provider "aws" {
 data "aws_vpc" "default" {
   default = true
 }
+
+# Used to suffix the S3 bucket names below, since both are unqualified enough
+# that another account may already hold them.
+data "aws_caller_identity" "current" {}
