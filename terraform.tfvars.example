@@ -3,7 +3,7 @@
 # db_password sets the RDS master password at create time: 8-128 characters,
 # no /, ", @ or spaces.
 
-region      = "us-east-1"
+region      = "us-west-2"
 name_prefix = "soc2-workshop"
 
 db_password = "replace-me"

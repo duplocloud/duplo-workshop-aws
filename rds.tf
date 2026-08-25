@@ -22,7 +22,6 @@ resource "aws_db_instance" "workshop" {
   storage_type      = "gp2"
   storage_encrypted = false
 
-  availability_zone      = "us-east-1d"
   multi_az               = false
   publicly_accessible    = true
   db_subnet_group_name   = aws_db_subnet_group.workshop.name

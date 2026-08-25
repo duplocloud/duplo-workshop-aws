@@ -1,7 +1,8 @@
 # soc2-workshop
 
 Terraform that stands up a small, deliberately non-compliant AWS estate in
-`us-east-1`, for use as the target of a SOC 2 posture review.
+`us-west-2` (controlled entirely by `var.region`), for use as the target of a
+SOC 2 posture review.
 
 Running it from a clean slate creates 17 resources across S3, RDS, EC2,
 CloudTrail and IAM. Most of them are misconfigured on purpose: the estate is the
@@ -49,7 +50,7 @@ correctly, so a review that flags every bucket indiscriminately is over-reportin
 - Terraform **1.11+** (the S3 backend uses `use_lockfile`)
 - AWS provider `~> 6.0`, locked to 6.61.0 in `.terraform.lock.hcl`
 - Credentials for the target account, and an existing **default VPC** in
-  `us-east-1`
+  `var.region` (`us-west-2` by default)
 - A state bucket at `s3://duplo-darren-workshop-tfstate-803817915563`, versioned
 
 ## Running it
@@ -85,10 +86,14 @@ fails without them:
 
 ## Notes
 
-**It is pinned to `us-east-1`.** `var.region` exists, but the RDS instance
-hardcodes `availability_zone = "us-east-1d"` and the S3 backend takes a literal
-region, since backend blocks cannot reference variables. Changing `var.region`
-alone will not relocate the estate.
+**Every resource follows `var.region`, except the state backend.** The
+provider, and every resource in it, deploy to whatever `var.region` resolves
+to (`us-west-2` by default) — the RDS instance no longer hardcodes an
+availability zone, so it picks one from that region's default VPC subnets at
+apply time. The one exception is the S3 backend in `versions.tf`, which stays
+pinned to a literal `us-west-2` since backend blocks cannot reference
+variables; that only affects where Terraform state lives, not the estate
+itself.
 
 **Bucket names are suffixed with the account ID.** `soc2-workshop-data-bucket`
 and `soc2-workshop-trail-logs` were unqualified enough that another account

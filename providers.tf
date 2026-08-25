@@ -13,8 +13,8 @@ provider "aws" {
   }
 }
 
-# The security group and RDS instance live in the account's default VPC
-# (vpc-0a9bf6c1794f55cb0, 172.31.0.0/16).
+# The security group and RDS instance live in the account's default VPC for
+# whichever region var.region resolves to.
 data "aws_vpc" "default" {
   default = true
 }

@@ -1,7 +1,7 @@
 variable "region" {
   description = "AWS region hosting the estate."
   type        = string
-  default     = "us-east-1"
+  default     = "us-west-2"
 }
 
 variable "name_prefix" {
