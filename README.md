@@ -15,7 +15,7 @@ exercise, not a reference implementation.
 | S3 bucket | `soc2-workshop-data-bucket-<account-id>-<random6>` | SSE-S3, `BucketOwnerPreferred`, a **`public-read` ACL**, and **all four public access blocks off** |
 | S3 bucket | `soc2-workshop-trail-logs-<account-id>-<random6>` | SSE-S3, `BucketOwnerEnforced`, all four public access blocks on, plus a policy letting CloudTrail write |
 | DB subnet group | `soc2-workshop-db-subnet-group` | Spans every subnet in the default VPC |
-| RDS instance | `soc2-workshop-db` | PostgreSQL 15.7 on `db.t3.micro`, 20 GB gp2, **publicly accessible**, **unencrypted at rest**, **no backups** |
+| RDS instance | `soc2-workshop-db` | PostgreSQL 15.19 on `db.t3.micro`, 20 GB gp2, **publicly accessible**, **unencrypted at rest**, **no backups** |
 | Security group | `soc2-workshop-app-sg` | **Ports 22 and 3389 open to `0.0.0.0/0`**, all egress allowed |
 | CloudTrail trail | `soc2-workshop-trail` | Single-region, **logging switched off**, no global service events, no log file validation |
 | IAM user | `soc2-workshop-service-user` | No access keys, no inline policies |
@@ -107,9 +107,15 @@ deletion — the random resource is destroyed and recreated every cycle, so
 each cycle picks a new name instead of trying to reclaim the one still
 draining.
 
-**PostgreSQL 15.7 is on extended support.** `engine_lifecycle_support` is set to
-`open-source-rds-extended-support`, which is billable once a version passes
-standard support. Worth checking before leaving the estate running.
+**Pinned minor versions age out of RDS.** The original `15.7` was retired from
+RDS entirely (`InvalidParameterCombination: Cannot find version 15.7 for
+postgres`), so it's now pinned to `15.19`, the newest `15.x` available as of
+2026-08-25. Expect to bump this again periodically — check
+`aws rds describe-db-engine-versions --engine postgres` in the target region
+before an apply if it starts failing the same way. `engine_lifecycle_support`
+is set to `open-source-rds-extended-support`, which is billable once a
+version passes standard support — worth checking before leaving the estate
+running.
 
 **Two settings have no live counterpart.** `skip_final_snapshot = true` governs
 destroy-time behaviour only. And RDS reports a preferred backup window of

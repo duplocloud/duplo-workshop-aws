@@ -1,7 +1,7 @@
 ###############################################################################
 # soc2-workshop-db
 #
-# PostgreSQL 15.7 on db.t3.micro, in the default VPC via the
+# PostgreSQL 15.19 on db.t3.micro, in the default VPC via the
 # aws_db_subnet_group declared in network.tf, and the default.postgres15
 # parameter group. Not managed by this config are the parameter group and
 # option group themselves, which are AWS-provided defaults and are referenced
@@ -11,7 +11,7 @@
 resource "aws_db_instance" "workshop" {
   identifier     = "${var.name_prefix}-db"
   engine         = "postgres"
-  engine_version = "15.7"
+  engine_version = "15.19"
   instance_class = "db.t3.micro"
 
   db_name  = "appdb"
