@@ -3,7 +3,7 @@ terraform {
   required_version = ">= 1.11.0"
 
   backend "s3" {
-    bucket = "duplocloud-workshop-terraform"
+    bucket = "duplocloud-workshop-tfstate"
     key    = "soc2-resources/terraform.tfstate"
     region = "us-west-2"
 
