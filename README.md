@@ -4,7 +4,7 @@ Terraform that stands up a small, deliberately non-compliant AWS estate in
 `us-west-2` (controlled entirely by `var.region`), for use as the target of a
 SOC 2 posture review.
 
-Running it from a clean slate creates 17 resources across S3, RDS, EC2,
+Running it from a clean slate creates 18 resources across S3, RDS, EC2,
 CloudTrail and IAM. Most of them are misconfigured on purpose: the estate is the
 exercise, not a reference implementation.
 
@@ -12,8 +12,8 @@ exercise, not a reference implementation.
 
 | Resource | Name | Delivered configuration |
 | --- | --- | --- |
-| S3 bucket | `soc2-workshop-data-bucket-<account-id>` | SSE-S3, `BucketOwnerPreferred`, a **`public-read` ACL**, and **all four public access blocks off** |
-| S3 bucket | `soc2-workshop-trail-logs-<account-id>` | SSE-S3, `BucketOwnerEnforced`, all four public access blocks on, plus a policy letting CloudTrail write |
+| S3 bucket | `soc2-workshop-data-bucket-<account-id>-<random6>` | SSE-S3, `BucketOwnerPreferred`, a **`public-read` ACL**, and **all four public access blocks off** |
+| S3 bucket | `soc2-workshop-trail-logs-<account-id>-<random6>` | SSE-S3, `BucketOwnerEnforced`, all four public access blocks on, plus a policy letting CloudTrail write |
 | DB subnet group | `soc2-workshop-db-subnet-group` | Spans every subnet in the default VPC |
 | RDS instance | `soc2-workshop-db` | PostgreSQL 15.7 on `db.t3.micro`, 20 GB gp2, **publicly accessible**, **unencrypted at rest**, **no backups** |
 | Security group | `soc2-workshop-app-sg` | **Ports 22 and 3389 open to `0.0.0.0/0`**, all egress allowed |
@@ -21,9 +21,10 @@ exercise, not a reference implementation.
 | IAM user | `soc2-workshop-service-user` | No access keys, no inline policies |
 | IAM policy | `soc2-workshop-wildcard-policy` | **`Action: *` on `Resource: *`**, attached to the user above |
 
-Those eight are the AWS-visible resources. The other nine Terraform resources
-configure the two buckets — ACL, ownership controls, public access block,
-encryption and bucket policy are each their own resource in the AWS provider.
+Those eight are the AWS-visible resources. Nine more configure the two
+buckets — ACL, ownership controls, public access block, encryption and bucket
+policy are each their own resource in the AWS provider — and the eighteenth
+is the `random_string` that suffixes both bucket names.
 
 Every taggable resource gets `ManagedBy=terraform` and `Extension=soc2-posture`,
 applied once through provider `default_tags`.
@@ -49,6 +50,7 @@ correctly, so a review that flags every bucket indiscriminately is over-reportin
 
 - Terraform **1.11+** (the S3 backend uses `use_lockfile`)
 - AWS provider `~> 6.0`, locked to 6.61.0 in `.terraform.lock.hcl`
+- random provider `~> 3.6`, for the bucket-name suffix
 - Credentials for the target account, and an existing **default VPC** in
   `var.region` (`us-west-2` by default)
 - A state bucket at `s3://duplo-darren-workshop-tfstate-803817915563`, versioned
@@ -62,7 +64,7 @@ terraform plan
 terraform apply
 ```
 
-A clean run reports `16 to add, 0 to change, 0 to destroy`. The RDS instance
+A clean run reports `18 to add, 0 to change, 0 to destroy`. The RDS instance
 takes roughly 5–10 minutes to come up; everything else completes in seconds.
 
 `db_password` is the only value you must supply. It sets the RDS master password
@@ -95,10 +97,15 @@ pinned to a literal `us-west-2` since backend blocks cannot reference
 variables; that only affects where Terraform state lives, not the estate
 itself.
 
-**Bucket names are suffixed with the account ID.** `soc2-workshop-data-bucket`
+**Bucket names get an account-ID and random suffix.** `soc2-workshop-data-bucket`
 and `soc2-workshop-trail-logs` were unqualified enough that another account
-could hold them, so both now get `-${data.aws_caller_identity.current.account_id}`
-appended in `s3.tf`.
+could hold them, so both get `-${data.aws_caller_identity.current.account_id}`
+appended in `s3.tf`. They also get a random 6-character suffix
+(`random_string.bucket_suffix` in `providers.tf`) so a `destroy` immediately
+followed by an `apply` doesn't race S3's eventually-consistent bucket
+deletion — the random resource is destroyed and recreated every cycle, so
+each cycle picks a new name instead of trying to reclaim the one still
+draining.
 
 **PostgreSQL 15.7 is on extended support.** `engine_lifecycle_support` is set to
 `open-source-rds-extended-support`, which is billable once a version passes

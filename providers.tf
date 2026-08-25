@@ -22,3 +22,15 @@ data "aws_vpc" "default" {
 # Used to suffix the S3 bucket names below, since both are unqualified enough
 # that another account may already hold them.
 data "aws_caller_identity" "current" {}
+
+# A second suffix for the same two buckets. S3 bucket deletion is eventually
+# consistent — recreating a bucket right after `terraform destroy` can still
+# hit BucketAlreadyOwnedByYou/time out waiting for the old one to fully drain
+# from the namespace. Since this resource (unlike the data sources above) is
+# destroyed and recreated on every destroy/apply cycle, each cycle gets a
+# fresh name instead of racing the previous bucket's deletion.
+resource "random_string" "bucket_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}

@@ -8,7 +8,7 @@
 ###############################################################################
 
 resource "aws_s3_bucket" "data" {
-  bucket = "${var.name_prefix}-data-bucket-${data.aws_caller_identity.current.account_id}"
+  bucket = "${var.name_prefix}-data-bucket-${data.aws_caller_identity.current.account_id}-${random_string.bucket_suffix.result}"
 }
 
 resource "aws_s3_bucket_ownership_controls" "data" {
@@ -61,7 +61,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
 ###############################################################################
 
 resource "aws_s3_bucket" "trail_logs" {
-  bucket = "${var.name_prefix}-trail-logs-${data.aws_caller_identity.current.account_id}"
+  bucket = "${var.name_prefix}-trail-logs-${data.aws_caller_identity.current.account_id}-${random_string.bucket_suffix.result}"
 }
 
 resource "aws_s3_bucket_ownership_controls" "trail_logs" {
