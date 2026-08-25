@@ -3,7 +3,7 @@
 Terraform that stands up a small, deliberately non-compliant AWS estate in
 `us-east-1`, for use as the target of a SOC 2 posture review.
 
-Running it from a clean slate creates 16 resources across S3, RDS, EC2,
+Running it from a clean slate creates 17 resources across S3, RDS, EC2,
 CloudTrail and IAM. Most of them are misconfigured on purpose: the estate is the
 exercise, not a reference implementation.
 
@@ -11,15 +11,16 @@ exercise, not a reference implementation.
 
 | Resource | Name | Delivered configuration |
 | --- | --- | --- |
-| S3 bucket | `soc2-workshop-data-bucket` | SSE-S3, `BucketOwnerPreferred`, a **`public-read` ACL**, and **all four public access blocks off** |
-| S3 bucket | `soc2-workshop-trail-logs` | SSE-S3, `BucketOwnerEnforced`, all four public access blocks on, plus a policy letting CloudTrail write |
+| S3 bucket | `soc2-workshop-data-bucket-<account-id>` | SSE-S3, `BucketOwnerPreferred`, a **`public-read` ACL**, and **all four public access blocks off** |
+| S3 bucket | `soc2-workshop-trail-logs-<account-id>` | SSE-S3, `BucketOwnerEnforced`, all four public access blocks on, plus a policy letting CloudTrail write |
+| DB subnet group | `soc2-workshop-db-subnet-group` | Spans every subnet in the default VPC |
 | RDS instance | `soc2-workshop-db` | PostgreSQL 15.7 on `db.t3.micro`, 20 GB gp2, **publicly accessible**, **unencrypted at rest**, **no backups** |
 | Security group | `soc2-workshop-app-sg` | **Ports 22 and 3389 open to `0.0.0.0/0`**, all egress allowed |
 | CloudTrail trail | `soc2-workshop-trail` | Single-region, **logging switched off**, no global service events, no log file validation |
 | IAM user | `soc2-workshop-service-user` | No access keys, no inline policies |
 | IAM policy | `soc2-workshop-wildcard-policy` | **`Action: *` on `Resource: *`**, attached to the user above |
 
-Those seven are the AWS-visible resources. The other nine Terraform resources
+Those eight are the AWS-visible resources. The other nine Terraform resources
 configure the two buckets — ACL, ownership controls, public access block,
 encryption and bucket policy are each their own resource in the AWS provider.
 
@@ -77,8 +78,8 @@ These are looked up or referenced by name rather than declared, and the apply
 fails without them:
 
 - the account's **default VPC**, via `data.aws_vpc.default` — it carries the
-  security group and, through the `default` DB subnet group, the database
-- the **`default` DB subnet group**
+  security group and, through its subnets, the database's DB subnet group
+  (`aws_db_subnet_group.workshop`, managed in `network.tf`)
 - the **`default.postgres15`** parameter group and **`default:postgres-15`**
   option group
 
@@ -89,9 +90,10 @@ hardcodes `availability_zone = "us-east-1d"` and the S3 backend takes a literal
 region, since backend blocks cannot reference variables. Changing `var.region`
 alone will not relocate the estate.
 
-**Bucket names are global.** `soc2-workshop-data-bucket` and
-`soc2-workshop-trail-logs` are unqualified enough that another account may hold
-them. If apply fails with `BucketAlreadyExists`, add an account-ID suffix.
+**Bucket names are suffixed with the account ID.** `soc2-workshop-data-bucket`
+and `soc2-workshop-trail-logs` were unqualified enough that another account
+could hold them, so both now get `-${data.aws_caller_identity.current.account_id}`
+appended in `s3.tf`.
 
 **PostgreSQL 15.7 is on extended support.** `engine_lifecycle_support` is set to
 `open-source-rds-extended-support`, which is billable once a version passes
