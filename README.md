@@ -1,4 +1,4 @@
-# soc2-workshop
+# Duplo Workshop SOC2 Extension
 
 Terraform that stands up a small, deliberately non-compliant AWS estate in
 `us-west-2` (controlled entirely by `var.region`), for use as the target of a
