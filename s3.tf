@@ -11,6 +11,15 @@ resource "aws_s3_bucket" "data" {
   bucket = "${var.name_prefix}-data-bucket-${data.aws_caller_identity.current.account_id}-${random_string.bucket_suffix.result}"
 }
 
+resource "aws_s3_bucket_public_access_block" "data_fix" {
+  bucket                  = aws_s3_bucket.data.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+
 resource "aws_s3_bucket_ownership_controls" "data" {
   bucket = aws_s3_bucket.data.id
 
