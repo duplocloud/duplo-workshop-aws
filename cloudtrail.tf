@@ -14,7 +14,7 @@ resource "aws_cloudtrail" "workshop" {
   include_global_service_events = false
   is_multi_region_trail         = false
   is_organization_trail         = false
-  enable_log_file_validation    = false
+  enable_log_file_validation = true
 
   depends_on = [aws_s3_bucket_policy.trail_logs]
 }
