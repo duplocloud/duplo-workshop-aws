@@ -23,7 +23,7 @@ resource "aws_db_instance" "workshop" {
   storage_encrypted = false
 
   multi_az               = false
-  publicly_accessible    = true
+  publicly_accessible = false
   db_subnet_group_name   = aws_db_subnet_group.workshop.name
   vpc_security_group_ids = [aws_security_group.app.id]
 
